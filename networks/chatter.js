@@ -188,7 +188,7 @@ function getFeed(network, cb){
               }
             });
           }
-          else if(_body.items.length){
+          else if(_body.items && _body.items.length){
             cb(null, _body.items);
           }
           else cb("Request_Feed_Error");

@@ -19,10 +19,10 @@ module.exports = {
 							"HMAC-SHA1"],
 			"localhost" : ["https://api.twitter.com/oauth/request_token", 
 							"https://api.twitter.com/oauth/access_token", 
-							"XEclxvJ8pdCFn0C3nrdA", 
-							"UohGYwXf8dQKXSW2rdJhVCslBGE15Ot1wuskjnb8", 
+							"ayvLds2E2ztD20fbsSsUDw", 
+							"RzHKjvbkT5OemY3D4YXcbRBh8ONhHoQV9lILdtGPJQ", 
 							"1.0", 
-							"http://localhost:8080", 
+							"https://bechtel.jit.su", 
 							"HMAC-SHA1"],
 			feedUrl		: 'https://api.twitter.com/1.1/statuses/home_timeline.json'
 		},
@@ -63,11 +63,11 @@ module.exports = {
 						    app_secret : "90492f1b8d61ccd05e2c2f2919b88dbf",
 							redirect_uri : "https://bechtel-live.showoff.io/"
 						},	
-					"localhost" : 
+					"bechtel.jit.su" : 
 						{
-							app_key : "454305501287934",
-						    app_secret : "90492f1b8d61ccd05e2c2f2919b88dbf",
-							redirect_uri : "https://localhost:8080"
+							app_key : "418943314839915",
+						    app_secret : "b99cff5c082392299b5383016033a5bf",
+							redirect_uri : "https://bechtel.jit.su/"
 						}
 		}		
 	}
