@@ -1,0 +1,21 @@
+{
+  "name": "timelines",
+  "preferGlobal": "true",
+  "version": "0.1.0-15",
+  "author": "Rick <support@nodejitsu.com>",
+  "description": "a simple zero-configuration command-line http server",
+  "subdomain": "timelines",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": ">= 1.2.0",
+    "request": "2.x.x",
+    "oauth": "0.9.x",
+    "mongoose": "3.1.x"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=0.6"
+  }
+}
