@@ -20,20 +20,18 @@ var model = db.model('facebook', schema, 'facebook');
 db.on('error', console.error.bind(console, 'connection error:'));
 
 function getNetwork(query, cb){
-	model.findOne(query, 
-		function(err, matches) {
-			if (err) {
-				console.log(err)
-				cb(err);
-			}
-			//console.log(matches)
-			if(matches){
-				cb(null, matches);
-			}
-			else{
-				cb(new Error('no matches'));
-			}
-		});
+  model.findOne(query, 
+    function(err, matches) {
+      if (err) {
+        cb("DB_Query_Error");
+      }
+      if(matches){
+        cb(null, matches);
+      }
+      else{
+        cb("DB_Match_Not_Found");
+      }
+    });
 }
 
 function startAuth(network, cb){
@@ -46,8 +44,7 @@ function startAuth(network, cb){
 	network.oauth_token = target.state;
 	network.save(function(e){
 		if(e){
-			console.log('error');
-			cb(new Error('save error'));
+			cb(new Error('DB_Save_Error'));
 		} 
 		else{						
 			console.log('token: ' + target.state);
@@ -65,10 +62,10 @@ function auth(network, token, verifier, cb){
 				+ "&client_secret=" + target[network.env].app_secret
 				+ "&code=" + token
 		}
-		console.log(options.url);
+
 		request(options, function(err, response, body){
 			if(err || !body){
-				cb("Error getting auth token");
+				cb("Request_Auth_Error");
 			}
 			else{
 				var _body = hlp.jsonifyQueryString(body);
@@ -78,21 +75,21 @@ function auth(network, token, verifier, cb){
 						network.registered = true;
 						network.save(function(err){
 							if(err){
-								cb(new Error('error saving network'));
+								cb('DB_Save_Error');
 							}
 							else{
 								cb(null, true);
 							}
-						})
+						});
 					}
-					else cb("Error getting ticket");
+					else cb("Auth_Failed");
 				}
-				else cb("Body not found");
+				else cb("Body_Not_Found");
 			}
 		});
 	}
 	catch(err){
-		cb( "error starting oauth request" );
+		cb( "Request_Auth_Error" );
 	}
 }
 function getFeed(network, cb){
@@ -104,7 +101,7 @@ function getFeed(network, cb){
 		}
 		request(options, function(err, response, body){
 			if(err || !body){
-				cb("Error getting auth token");
+				cb("Request_Feed_Error");
 			}
 			else{
 				var _body = hlp.parseBody(body);
@@ -112,14 +109,14 @@ function getFeed(network, cb){
 					if(_body.data){
         				cb(null, _body.data);
 					}
-					else cb("Error getting facebook timeline");
+					else cb("Request_Feed_Error");
 				}
-				else cb("Body not found");
+				else cb("Body_Not_Found");
 			}
 		});
 	}
 	catch(err){
-		cb( "error starting oauth request" );
+		cb( "Request_Feed_Error" );
 	}
 }
 function createNetwork(contact, cb){
@@ -134,12 +131,11 @@ function createNetwork(contact, cb){
 	});
 		item.save(function(err, item) {
 			if (err){ 
-				console.log('failed saving item');
-				cb(new Error(err)); 
+				cb("DB_Save_Error"); 
 			}
 			
 			startAuth(item, function(e, link){
-				if(e) cb(new Error("error starting auth from create"));					
+				if(e) cb("Error_Starting_Auth");					
 				cb(null, link);
 			});	
 			
@@ -154,8 +150,6 @@ module.exports.StartAuth = function(req, res){
 			var q = { "name" : contact.username, "env" : host }
 			getNetwork(q, function(err, network){
 				if(err) {
-					//create network, return link
-					console.log(err)
 					contact.host = host;
 					createNetwork(contact, function(err, link){
 						if(err) res.json(500, {error:err});					
@@ -178,7 +172,7 @@ module.exports.StartAuth = function(req, res){
 		}
 		else{
 			//return no contact found error
-			res.json(500, {error: 'no contact found'});
+			res.json(500, {error: 'User_Not_Found'});
 		}
 	})
 	
@@ -212,7 +206,7 @@ module.exports.Auth = function(req, res){
 		}
 		else{
 			//return no contact found error
-			res.json(500, 'error: no contact found');
+			res.json(500, {'error': "User_Not_Found"});
 		}
 	});
 }
@@ -225,10 +219,10 @@ module.exports.Feed = function(req, res){
 			var q = { "name" : contact.username, "env" : host }
 			getNetwork(q, function(err, network){
 				if(err) {
-					if(err) res.json(500, {error:err});
+					res.json(500, {error:err});
 				} 
 				else if(!network.registered || network.access_token == null){
-					if(err) res.json(500, {error:"not registered"});	
+					if(err) res.json(500, {error:err});	
 				}
 				else{
 					//get feed
@@ -246,7 +240,7 @@ module.exports.Feed = function(req, res){
 		}
 		else{
 			//return no contact found error
-			res.json(500, 'error: no contact found');
+			res.json(500, {'error' : 'User_Not_Found'});
 		}
 	})
 }

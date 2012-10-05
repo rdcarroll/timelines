@@ -60,6 +60,7 @@ module.exports.parseBody = parseBody = function(body){
 	}
 	return "no content found";
 }
+
 module.exports.jsonifyQueryString = function(q){
 	href = q;
 	qStr = href.replace(/(.*?\?)/, '');

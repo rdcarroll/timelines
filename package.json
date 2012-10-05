@@ -1,7 +1,7 @@
 {
   "name": "timelines",
   "preferGlobal": "true",
-  "version": "0.1.0-15",
+  "version": "0.1.0-17",
   "author": "Rick <support@nodejitsu.com>",
   "description": "a simple zero-configuration command-line http server",
   "subdomain": "timelines",

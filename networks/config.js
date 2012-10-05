@@ -30,7 +30,7 @@ module.exports = {
 		    start_base_url : "https://bechtel.my.salesforce.com/services/",
 		    oauth_path : "oauth2/authorize",
 		    access_path : "oauth2/token",
-			state       : "bechtel_live",
+			state       : "bechtel_live_chatter",
 			grant_type  : "authorization_code",
 		    response_type : "code",
 		    type : "web_server",		

@@ -24,15 +24,13 @@ function getNetwork(query, cb){
   model.findOne(query, 
     function(err, matches) {
       if (err) {
-        console.log(err)
-        cb("Query_Error");
+        cb("DB_Query_Error");
       }
-      //console.log(matches)
       if(matches){
         cb(null, matches);
       }
       else{
-        cb("Match_Not_Found");
+        cb("DB_Match_Not_Found");
       }
     });
 }
@@ -46,8 +44,7 @@ function startAuth(network, cb){
         
   network.save(function(e){
     if(e){
-      console.log('error');
-      cb(new Error('save error'));
+      cb("DB_Save_Error");
     } 
     else{           
       console.log('url' + url);
@@ -70,7 +67,7 @@ function auth(network, token, cb){
     }
     request(options, function(err, response, body){
       if(err || !body){
-        cb("Error getting auth token");
+        cb("Request_Auth_Error");
       }
       else{
         var _body = hlp.parseBody(body);
@@ -82,45 +79,23 @@ function auth(network, token, cb){
             network.issued_at = _body.issued_at;
             network.save(function(err){
               if(err){
-                cb(new Error('error saving network'));
+                cb(new Error('DB_Save_Error'));
               }
               else{
                 cb(null, true);
               }
             })
           }
-          else cb("Error getting ticket");
+          else cb("Auth_Failed");
         }
-        else cb("Body not found");
+        else cb("Body_Not_Found");
       }
     });
   }
   catch(err){
-    cb( "error starting oauth request" );
+    cb( "Request_Auth_Error" );
   }
 }
-// function getResources(network, cb){
-    // options={
-      // url : "https://bechtel.my.salesforce.com/chatter"
-        // + " -H 'Authorization: Bearer " + network.access_token + "'"
-    // }
-    // request(options, function(err, response, body){
-      // if(err || !body){
-        // cb("Error getting resources");
-      // }
-      // else{
-        // var _body = hlp.parseBody(body);
-        // if(typeof(_body) === 'object'){
-          // if(_body.access_token){
-//            
-          // }
-          // else cb("Error getting resources");
-        // }
-        // else cb("Body not found getting resources");
-      // }
-    // });	
-// 	
-// }
 function refreshToken(network, cb){
   
   try{
@@ -144,7 +119,7 @@ function refreshToken(network, cb){
             network.access_token = _body.access_token
             network.save(function(err){
               if(err){
-                cb(new Error('Query_Update_Error'));
+                cb(new Error('DB_Save_Error'));
               }
               else{
                 cb(null, true);
@@ -181,9 +156,9 @@ function getFeed(network, cb){
             network.access_token = null;
             network.save(function(err){
               if(err){
-                cb(new Error('Query_Update_Error'));
+                cb('DB_Save_Error');
               }
-              else if(_body.items.length){
+              else{
                 cb("Invalid_Session");
               }
             });
@@ -214,12 +189,11 @@ function createNetwork(contact, cb){
   });
     item.save(function(err, item) {
       if (err){ 
-        console.log('failed saving item');
-        cb(new Error(err)); 
+        cb("DB_Save_Error"); 
       }
       
       startAuth(item, function(e, link){
-        if(e) cb(new Error("error starting auth from create"));         
+        if(e) cb("Error_Starting_Auth");         
         cb(null, link);
       }); 
       
@@ -234,8 +208,6 @@ module.exports.StartAuth = function(req, res){
       var q = { "name" : contact.username, "env" : host }
       getNetwork(q, function(err, network){
         if(err) {
-          //create network, return link
-          console.log(err)
           contact.host = host;
           createNetwork(contact, function(err, link){
             if(err) res.json(500, {error:err});         
@@ -269,7 +241,7 @@ module.exports.StartAuth = function(req, res){
     }
     else{
       //return no contact found error
-      res.json(500, {error: 'no contact found'});
+      res.json(500, {error: 'User_Not_Found'});
     }
   })
   
@@ -302,7 +274,7 @@ module.exports.Auth = function(req, res){
     }
     else{
       //return no contact found error
-      res.json(500, {'error': 'no contact found'});
+      res.json(500, {'error': 'User_Not_Found'});
     }
   })
 }
@@ -329,7 +301,7 @@ module.exports.RefreshAuth = function(req, res){
     }
     else{
       //return no contact found error
-      res.json(500, {'error': 'Match_Not_Found'});
+      res.json(500, {'error': 'User_Not_Found'});
     }
   })
 }
@@ -341,10 +313,10 @@ module.exports.Feed = function(req, res){
       var q = { "name" : contact.username, "env" : host }
       getNetwork(q, function(err, network){
         if(err) {
-          if(err) res.json(500, {error:err});
+          res.json(500, {error:err});
         } 
         else if(!network.registered || network.access_token == null){
-          if(err) res.json(500, {error:"not registered"});  
+          if(err) res.json(500, {error:err});  
         }
         else{
           //get feed
@@ -362,7 +334,7 @@ module.exports.Feed = function(req, res){
     }
     else{
       //return no contact found error
-      res.json(500, {'error': 'Match_Not_Found'});
+      res.json(500, {'error': 'User_Not_Found'});
     }
   })
 }

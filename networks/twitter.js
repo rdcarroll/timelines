@@ -22,39 +22,35 @@ var model = db.model('twitter', schema, 'twitter');
 db.on('error', console.error.bind(console, 'connection error:'));
 
 function getNetwork(query, cb){
-	model.findOne(query, 
-		function(err, matches) {
-			if (err) {
-				console.log(err)
-				cb(err);
-			}
-			//console.log(matches)
-			if(matches){
-				cb(null, matches);
-			}
-			else{
-				cb(new Error('no matches'));
-			}
-		});
+  model.findOne(query, 
+    function(err, matches) {
+      if (err) {
+        cb("DB_Query_Error");
+      }
+      if(matches){
+        cb(null, matches);
+      }
+      else{
+        cb("DB_Match_Not_Found");
+      }
+    });
 }
 
 function startAuth(network, cb){
 	try{
 		oa.getOAuthRequestToken(function(error, oauth_token, oauth_token_secret, results) {
 			if (error || !results) {
-				console.log(error);
-				cb(new Error("error getting request token"));
+				cb("Request_Auth_URL_Error");
 			} else {				
 				network.oauth_token = oauth_token;
 				network.oauth_token_secret = oauth_token_secret;
 				network.save(function(e){
 					if(e){
-						console.log('error');
-						cb(new Error('save error'));
+						cb(new Error('DB_Save_Error'));
 					} 
 					else{						
-						console.log('token: ' + oauth_token);
-						console.log('oauth.token_secret: ' + oauth_token_secret);
+						// console.log('token: ' + oauth_token);
+						// console.log('oauth.token_secret: ' + oauth_token_secret);
 						cb(null, 'https://twitter.com/oauth/authenticate?oauth_token=' + oauth_token);
 					}
 				})
@@ -63,7 +59,7 @@ function startAuth(network, cb){
 		
 	}
 	catch(err){
-		cb( "error starting oauth request" );
+		cb( "Request_Auth_URL_Error" );
 	}
 	
 }
@@ -71,8 +67,7 @@ function auth(network, token, verifier, cb){
 	oa.getOAuthAccessToken( network.oauth_token, network.oauth_token_secret, verifier, 
 		function(error, oauth_access_token, oauth_access_token_secret, results){
 			if(error){
-				console.log(error);
-				cb(new Error('error getting access token'));
+				cb('Request_Auth_Error');
 			}
 			else{
 				network.access_token = oauth_access_token;
@@ -80,7 +75,7 @@ function auth(network, token, verifier, cb){
 				network.registered = true;
 				network.save(function(err){
 					if(err){
-						cb(new Error('error saving network'));
+						cb("DB_Save_Error");
 					}
 					else{
 						cb(null, true);
@@ -91,9 +86,8 @@ function auth(network, token, verifier, cb){
 }
 function getFeed(network, cb){
 	oa.get(target.feedUrl, network.access_token, network.access_secret, function(error, data, response){
-		if(error){ cb(new Error('error getting timeline')); }
+		if(error){ cb("Request_Feed_Error"); }
 		else{
-			//console.log(data);
 			cb(null, data);
 		}
 	})
@@ -111,12 +105,11 @@ function createNetwork(contact, cb){
 	});
 		item.save(function(err, item) {
 			if (err){ 
-				console.log('failed saving item');
-				cb(new Error(err)); 
+				cb("DB_Save_Error"); 
 			}
 			
 			startAuth(item, function(e, link){
-				if(e) cb(new Error("error starting auth from create"));					
+				if(e) cb("Error_Starting_Auth");					
 				cb(null, link);
 			});	
 			
@@ -133,20 +126,6 @@ var createOAuth = (function() {
     }
 })();
 
-// function parseBody(body){
-	// var out;
-	// if(body){
-		// try{
-			// out = JSON.parse(body);
-		// }
-		// catch(e){
-			// return "error parsing body"
-		// }
-		// return out;
-	// }
-	// return "no content found";
-// }
-
 module.exports.StartAuth = function(req, res){
     var host = req.get('x-app-name');
 	oa = createOAuth( target[host]);
@@ -155,8 +134,6 @@ module.exports.StartAuth = function(req, res){
 			var q = {"name" : contact.username, "env" : host }
 			getNetwork(q, function(err, network){
 				if(err) {
-					//create network, return link
-					console.log(err)
 					contact.host = host;
 					createNetwork(contact, function(err, link){
 						if(err) res.send(500, {error:err});					
@@ -179,7 +156,7 @@ module.exports.StartAuth = function(req, res){
 		}
 		else{
 			//return no contact found error
-			res.send(500, 'error: no contact found');
+			res.send(500, {'error' : 'User_Not_Found'});
 		}
 	})
 	
@@ -213,7 +190,7 @@ module.exports.Auth = function(req, res){
 		}
 		else{
 			//return no contact found error
-			res.send(500, 'error: no contact found');
+			res.send(500, { error : 'User_Not_Found'});
 		}
 	})
 }
@@ -225,10 +202,10 @@ module.exports.Feed = function(req, res){
 			var q = { "name" : contact.username, "env" : host }
 			getNetwork(q, function(err, network){
 				if(err) {
-					if(err) res.send(500, {error:err});
+					res.send(500, {error:err});
 				} 
 				else if(!network.registered || network.access_token == null || network.access_secret == null){
-					if(err) res.send(500, {error:"not registered"});	
+					if(err) res.send(500, {error:err});	
 				}
 				else{
 					//get feed
@@ -246,7 +223,7 @@ module.exports.Feed = function(req, res){
 		}
 		else{
 			//return no contact found error
-			res.send(500, {error: 'no contact found'});
+			res.send(500, {error: 'User_Not_Found'});
 		}
 	})
 }
