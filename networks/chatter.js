@@ -142,7 +142,7 @@ function getFeed(network, cb){
   try{
     options={
       url : target.start_base_url + target.feed_url
-        + "feeds/company/feed-items",
+        + "feeds/news/me/feed-items",
       headers : {'Authorization': 'Bearer ' + network.access_token }   
     }
     request(options, function(err, response, body){

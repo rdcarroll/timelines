@@ -17,7 +17,7 @@ module.exports = {
 							"1.0", 
 							"https://bechtel-live.showoff.io", 
 							"HMAC-SHA1"],
-			"localhost" : ["https://api.twitter.com/oauth/request_token", 
+			"bechtel.jit.su" : ["https://api.twitter.com/oauth/request_token", 
 							"https://api.twitter.com/oauth/access_token", 
 							"ayvLds2E2ztD20fbsSsUDw", 
 							"RzHKjvbkT5OemY3D4YXcbRBh8ONhHoQV9lILdtGPJQ", 
