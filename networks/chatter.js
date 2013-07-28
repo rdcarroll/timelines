@@ -176,6 +176,47 @@ function getFeed(network, cb){
     cb( "Request_Feed_Error" );
   }
 }
+function nativeOp(network, opts, cb){
+  
+  try{
+    options={
+      url : target.start_base_url + target.feed_url
+        + unescape(opts.url),
+      body : JSON.stringify(opts.body),
+      method : opts.method,
+      headers : {'Authorization': 'Bearer ' + network.access_token }   
+    }
+    request(options, function(err, response, body){
+      if(err || !body){
+        cb("Request_Feed_Error");
+      }
+      else{
+        var _body = hlp.parseBody(body);
+        if(typeof(_body) === 'object'){
+          if(_body.length && _body[0]['errorCode'] == "INVALID_SESSION_ID"){
+            network.access_token = null;
+            network.save(function(err){
+              if(err){
+                cb('DB_Save_Error');
+              }
+              else{
+                cb("Invalid_Session");
+              }
+            });
+          }
+          else if(_body){
+            cb(null, _body);
+          }
+          else cb("Request_Feed_Error");
+        }
+        else cb("Body_Not_Found");
+      }
+    });
+  }
+  catch(err){
+    cb( "Request_Feed_Error" );
+  }
+}
 function createNetwork(contact, cb){
   var item = new model({
     name : contact.username,
@@ -321,6 +362,45 @@ module.exports.Feed = function(req, res){
         else{
           //get feed
           getFeed(network, function(err, data){
+            if(err){
+              res.json( 500, { error : err });      
+            }   
+            else{
+              res.json( 200, data );              
+            }               
+          });
+          
+        }
+      })
+    }
+    else{
+      //return no contact found error
+      res.json(500, {'error': 'User_Not_Found'});
+    }
+  })
+}
+module.exports.NativeOp = function(req, res){
+    var opts = {};
+    var host = req.get('x-app-name');
+    var url = req.query['url'];
+    
+  hlp.getContact(req, function(err, contact){
+    if(contact){
+      var q = { "name" : contact.username, "env" : host }
+      getNetwork(q, function(err, network){
+        if(err) {
+          res.json(500, {error:err});
+        } 
+        else if(!network.registered || network.access_token == null){
+          if(err) res.json(500, {error:err});  
+        }
+        else{
+          //get feed
+          opts.url = url
+          opts.method = req.route.method
+          opts.body = req.body
+          
+          nativeOp(network, opts, function(err, data){
             if(err){
               res.json( 500, { error : err });      
             }   

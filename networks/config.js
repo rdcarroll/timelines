@@ -2,7 +2,8 @@ module.exports = {
 	headers : {
       "Content-Type": "application/json",
       Accept: "application/json",
-      "X-Mypsn-AppKey": "d3d41e2a633ddc34e88ec8d1929d5c50"	
+      // "X-Mypsn-AppKey": "d3d41e2a633ddc34e88ec8d1929d5c50"	
+      "X-Mypsn-AppKey": "52190741a2bdd5069f549bdd09471aa2"  
 	},
 	mongodb : {
 		production :  'mongodb://nodejitsu:347fe515b3fad7ea90d66e57bb3406f4@alex.mongohq.com:10020/nodejitsudb408663363097',
@@ -26,26 +27,49 @@ module.exports = {
 							"HMAC-SHA1"],
 			feedUrl		: 'https://api.twitter.com/1.1/statuses/home_timeline.json'
 		},
+        linkedin : {     
+            "bechtel-live.showoff.io" : ["https://api.linkedin.com/uas/oauth/requestToken?scope=r_basicprofile+rw_nus+rw_groups", 
+                            "https://api.linkedin.com/uas/oauth/accessToken",
+                            "pu6p6xxncy3x", 
+                            "Q6H7FSEGY9bDIBAc", 
+                            "1.0", 
+                            "https://bechtel.jit.su", 
+                            "HMAC-SHA1"],
+            "bechtel.jit.su" : ["https://api.linkedin.com/uas/oauth/requestToken?scope=r_basicprofile+rw_nus+rw_groups", 
+                            "https://api.linkedin.com/uas/oauth/accessToken", 
+                            "pu6p6xxncy3x", 
+                            "Q6H7FSEGY9bDIBAc", 
+                            "1.0", 
+                            "https://bechtel.jit.su", 
+                            "HMAC-SHA1"],
+            feedUrl     : 'https://api.linkedin.com/v1/people/~/network/updates?scope=self&format=json'
+        },
 		chatter : {
 		    start_base_url : "https://bechtel.my.salesforce.com/services/",
 		    oauth_path : "oauth2/authorize",
 		    access_path : "oauth2/token",
-			state       : "bechtel_live_chatter",
+			state       : "bam_chatter",
 			grant_type  : "authorization_code",
 		    response_type : "code",
 		    type : "web_server",		
-			"bechtel-live.showoff.io" : {
-				name : "RCarrollDev",
-				app_key : "3MVG9CVKiXR7Ri5qm55XNkyFqxebH3dQALl8nX1Pu_PeIR9dyWMAg61q.ylCVnNqNyEoXE5It2vvT628z.nwZ",
-			    app_secret : "2897516583267596092",
-				redirect_uri : "https://bechtel-live.showoff.io"
-			},
-			"bechtel.jit.su" : {
-				name : "BechtelLive",
-				app_key : "3MVG9CVKiXR7Ri5qm55XNkyFqxdAXx2zc9V7oXmt0ne0v.4srT4lCApUjNL.zYDapTqMUcc8YwnNgIkTbt3LK",
-			    app_secret : "2436569273219565242",
-				redirect_uri : "https://bechtel.jit.su"
-			},
+			// "bechtel-live.showoff.io" : {
+				// name : "RCarrollDev",
+				// app_key : "3MVG9CVKiXR7Ri5qm55XNkyFqxebH3dQALl8nX1Pu_PeIR9dyWMAg61q.ylCVnNqNyEoXE5It2vvT628z.nwZ",
+			    // app_secret : "2897516583267596092",
+				// redirect_uri : "https://bechtel-live.showoff.io"
+			// },
+			// "bechtel.jit.su" : {
+				// name : "BechtelLive",
+				// app_key : "3MVG9CVKiXR7Ri5qm55XNkyFqxdAXx2zc9V7oXmt0ne0v.4srT4lCApUjNL.zYDapTqMUcc8YwnNgIkTbt3LK",
+			    // app_secret : "2436569273219565242",
+				// redirect_uri : "https://bechtel.jit.su"
+			// },
+            "developer.mypsn.com" : {
+                name : "BAM",
+                app_key : "3MVG9CVKiXR7Ri5qm55XNkyFqxXeVWOj2CA0jNxIW057ahvTVNS6QzRmmrlay8MuWB0JQJ4K0omVIyMYZexjV",
+                app_secret : "5271918293035441157",
+                redirect_uri : "https://developer.mypsn.com"
+            },
 			feed_url		: 'data/v25.0/chatter/'
 		},
 		
